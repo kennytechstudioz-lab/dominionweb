@@ -28,7 +28,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
             >
               {/* Ambient Looping Video Preview */}
               <video
-                src="/Capricorn.mp4"
+                src="/Dominion.mp4"
                 autoPlay
                 muted
                 loop
@@ -80,7 +80,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
 
               {/* Body Description */}
               <p className="text-sm sm:text-base text-neutral-600 leading-relaxed mb-8">
-                Capricorn Energy Limited is a forward-thinking investment firm dedicated to delivering consistent, high-yield returns to investors worldwide. With a diversified portfolio spanning clean energy, real assets, and structured financial instruments, we have built a proven track record of profitable performance that continues to grow year after year.
+                Dominion Group Limited is a forward-thinking investment firm dedicated to delivering consistent, high-yield returns to investors worldwide. With a diversified portfolio spanning clean energy, real assets, and structured financial instruments, we have built a proven track record of profitable performance that continues to grow year after year.
               </p>
 
               {/* Bottom Cards / Lists */}
@@ -160,7 +160,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
       <VideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
-        videoSrc="/Capricorn.mp4"
+        videoSrc="/Dominion.mp4"
       />
     </section>
   );

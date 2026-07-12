@@ -81,8 +81,8 @@ export default function Header() {
             <Link href="/" className="flex items-center group">
               <div className="relative h-[52px] w-[187px]">
                 <Image
-                  src="/CapricornLogo.png"
-                  alt="Capricorn"
+                  src="/DominionLogo.png"
+                  alt="Dominion"
                   fill
                   className="object-contain object-left"
                   priority
@@ -239,8 +239,8 @@ export default function Header() {
             >
               <div className="relative h-[52px] w-[187px]">
                 <Image
-                  src="/CapricornLogo.png"
-                  alt="Capricorn"
+                  src="/DominionLogo.png"
+                  alt="Dominion"
                   fill
                   className="object-contain object-left brightness-0 invert"
                 />

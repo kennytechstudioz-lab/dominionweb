@@ -98,7 +98,7 @@ export default function ForgotPasswordResetPage() {
           Set New Password
         </h2>
         <p className="text-sm text-neutral-400 font-light">
-          Create a strong new password for your Capricorn Energy Ltd account.
+          Create a strong new password for your Dominion Group Ltd account.
         </p>
       </div>
 

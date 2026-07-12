@@ -15,26 +15,26 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Capricorn Energy Ltd | Secure Oil & Gas Investment Platform",
-    template: "%s | Capricorn Energy Ltd"
+    default: "Dominion Group Ltd | Secure Oil & Gas Investment Platform",
+    template: "%s | Dominion Group Ltd"
   },
-  description: "Capricorn Energy Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
-  keywords: ["Capricorn Energy", "Capricorn Energy Ltd", "Oil and Gas Investment", "Energy Invest Platform", "Daily Yield returns", "Crude Oil Tranches", "Natural Gas Investment", "Passive energy returns", "Secure yield platform", "sustainable energy investment", "daily oil returns"],
+  description: "Dominion Group Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
+  keywords: ["Dominion Group", "Dominion Group Ltd", "Oil and Gas Investment", "Energy Invest Platform", "Daily Yield returns", "Crude Oil Tranches", "Natural Gas Investment", "Passive energy returns", "Secure yield platform", "sustainable energy investment", "daily oil returns"],
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "Capricorn Energy Ltd | Secure Oil & Gas Investment Platform",
-    description: "Capricorn Energy Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
-    url: "https://capricornenergy.com",
-    siteName: "Capricorn Energy Ltd",
+    title: "Dominion Group Ltd | Secure Oil & Gas Investment Platform",
+    description: "Dominion Group Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
+    url: "https://dominiongroup.online",
+    siteName: "Dominion Group Ltd",
     images: [
       {
-        url: "/CapricornLogo.png",
+        url: "/DominionLogo.png",
         width: 800,
         height: 600,
-        alt: "Capricorn Energy Ltd",
+        alt: "Dominion Group Ltd",
       },
     ],
     locale: "en_US",
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Capricorn Energy Ltd | Secure Oil & Gas Investment Platform",
-    description: "Capricorn Energy Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
-    images: ["/CapricornLogo.png"],
+    title: "Dominion Group Ltd | Secure Oil & Gas Investment Platform",
+    description: "Dominion Group Ltd is a world-class Oil and Gas energy company. Secure robust daily compound returns from managed crude oil tranches, natural gas pipelines, and clean-energy transitions directly through our secure, high-yield digital investment platform.",
+    images: ["/DominionLogo.png"],
   },
 };
 

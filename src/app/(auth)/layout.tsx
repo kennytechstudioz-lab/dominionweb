@@ -52,7 +52,7 @@ export default function AuthLayout({
               />
             </svg>
             <span className="text-2xl font-bold tracking-tight text-white group-hover:text-[#e4c126] transition-colors">
-              capricorn<span className="text-[#82b440]">.</span>
+              dominion<span className="text-[#82b440]">.</span>
             </span>
           </Link>
 
@@ -85,7 +85,7 @@ export default function AuthLayout({
 
         {/* Small branding watermark */}
         <div className="absolute bottom-8 left-16 z-20 text-xs text-white/35 font-light">
-          © {new Date().getFullYear()} Capricorn Energy Ltd. All Rights Reserved.
+          © {new Date().getFullYear()} Dominion Group Ltd. All Rights Reserved.
         </div>
       </div>
 

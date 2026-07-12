@@ -141,7 +141,7 @@ export default function SolutionsSection() {
 
             {/* Paragraph copy */}
             <p className="text-sm sm:text-base text-white/70 leading-relaxed max-w-xl">
-              Capricorn Energy Limited brings institutional-grade investment infrastructure to individual and corporate investors worldwide. Our integrated approach combines high-efficiency refining, disciplined crude production, and proven project management — delivering consistent returns backed by real, tangible energy assets.
+              Dominion Group Limited brings institutional-grade investment infrastructure to individual and corporate investors worldwide. Our integrated approach combines high-efficiency refining, disciplined crude production, and proven project management — delivering consistent returns backed by real, tangible energy assets.
             </p>
 
             {/* Discover More CTA Button */}

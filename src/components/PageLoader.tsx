@@ -43,8 +43,8 @@ export default function PageLoader() {
 
         <div className="relative h-16 w-56 animate-pulse select-none">
           <Image
-            src="/CapricornLogo.png"
-            alt="Capricorn Energy Logo"
+            src="/DominionLogo.png"
+            alt="Dominion Group Logo"
             fill
             className="object-contain"
             priority

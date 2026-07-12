@@ -277,7 +277,7 @@ function DashboardContent({ tab }: { tab: string }) {
               ? "Track clean energy yields, CCUS dividends, and carbon certificates from registered wallets."
               : tab === "settings"
               ? "Manage your multi-factor security, change password, and configure payout destination addresses."
-              : `Manage your ${tab} parameters, history, and Capricorn Energy sustainable tranches.`}
+              : `Manage your ${tab} parameters, history, and Dominion Group sustainable tranches.`}
           </p>
         </div>
 
@@ -579,7 +579,7 @@ function DashboardContent({ tab }: { tab: string }) {
 
 export default function DashboardView({ tab }: { tab: string }) {
   return (
-    <Suspense fallback={<div className="p-8 text-neutral-500 text-xs">Querying Capricorn Energy secure session...</div>}>
+    <Suspense fallback={<div className="p-8 text-neutral-500 text-xs">Querying Dominion Group secure session...</div>}>
       <DashboardContent tab={tab} />
     </Suspense>
   );

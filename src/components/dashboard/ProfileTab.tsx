@@ -480,11 +480,10 @@ export function ProfileTab() {
         </div>
       </div>
 
-      {/* Bottom Card: Rate & Review Form */}
       <div className="bg-[#0f1115] border border-neutral-900 p-6 rounded flex flex-col gap-6">
         <div className="flex flex-col gap-1 border-b border-neutral-900 pb-4">
           <h4 className="text-base font-extrabold text-white tracking-wide">Share Your Investment Experience</h4>
-          <p className="text-sm text-neutral-400 font-light">Rate Capricorn Energy platform performance and let others know about clean energy pipelines yields.</p>
+          <p className="text-sm text-neutral-400 font-light">Rate Dominion Group platform performance and let others know about clean energy pipelines yields.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

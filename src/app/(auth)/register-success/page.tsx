@@ -24,7 +24,7 @@ export default function RegisterSuccessPage() {
           Registration Successful!
         </span>
         <p className="max-w-md mx-auto text-sm text-neutral-400 font-light leading-relaxed mt-2">
-          Your Capricorn Energy Ltd oil & gas allocation keys have been generated. You are now ready to activate your portfolio and start earning physical oil & gas-backed daily dividends.
+          Your Dominion Group Ltd oil & gas allocation keys have been generated. You are now ready to activate your portfolio and start earning physical oil & gas-backed daily dividends.
         </p>
       </div>
 

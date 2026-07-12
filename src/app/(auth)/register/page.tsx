@@ -266,7 +266,7 @@ export default function RegisterPage() {
               className="accent-[#e4c126] mt-0.5 rounded bg-[#16171d] border border-white/10"
             />
             <span>
-              I accept Capricorn Energy Ltd&apos;s{" "}
+              I accept Dominion Group Ltd&apos;s{" "}
               <Link href="/terms" className="text-[#e4c126] hover:text-[#f1cf34] font-bold transition-colors">
                 Terms & Conditions
               </Link>{" "}

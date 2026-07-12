@@ -90,7 +90,7 @@ export function AdminSidebar({
           >
             <div className="relative h-10 w-full">
               <Image
-                src="/CapricornLogo.png"
+                src="/DominionLogo.png"
                 alt="Logo"
                 fill
                 className="object-contain object-left"
