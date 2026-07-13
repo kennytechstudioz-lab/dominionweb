@@ -33,7 +33,7 @@ export default function Toast() {
       <style>{`
         @keyframes toastSlideIn {
           from {
-            transform: translateY(20px);
+            transform: translateY(-20px);
             opacity: 0;
           }
           to {
@@ -45,7 +45,7 @@ export default function Toast() {
           animation: toastSlideIn 0.3s ease-out forwards;
         }
       `}</style>
-      <div className={`fixed bottom-6 right-6 z-[999999] max-w-sm w-[calc(100vw-3rem)] bg-[#0f1115]/95 backdrop-blur-md border ${borderGlow} rounded p-5 flex items-start gap-3.5 animate-toast`}>
+      <div className={`fixed top-6 right-6 z-[999999] max-w-sm w-[calc(100vw-3rem)] bg-[#0f1115]/95 backdrop-blur-md border ${borderGlow} rounded p-5 flex items-start gap-3.5 animate-toast`}>
         {/* Glow indicator pulse */}
         <span className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${indicatorColor}`} />
         

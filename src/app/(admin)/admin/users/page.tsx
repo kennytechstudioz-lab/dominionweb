@@ -54,6 +54,9 @@ export default function AdminUsersPage() {
   const [selectedUserForWallets, setSelectedUserForWallets] = useState<UserProfile | null>(null);
   const [userWalletsPopup, setUserWalletsPopup] = useState<any[]>([]);
   const [walletsPopupLoading, setWalletsPopupLoading] = useState(false);
+  // walletEdits: tracks live edits { [walletId]: { address, balance } }
+  const [walletEdits, setWalletEdits] = useState<Record<string, { address: string; balance: string }>>({});
+  const [walletSavingId, setWalletSavingId] = useState<string | null>(null);
 
   // Verification modal states
   const [verifUser, setVerifUser] = useState<UserProfile | null>(null);
@@ -156,16 +159,50 @@ export default function AdminUsersPage() {
   const openUserWallets = async (user: UserProfile) => {
     setSelectedUserForWallets(user);
     setUserWalletsPopup([]);
+    setWalletEdits({});
     setWalletsPopupLoading(true);
     try {
       const res = await apiCall<{ success: boolean; wallets: any[] }>(
         `/api/users/wallets?username=${encodeURIComponent(user.username)}`
       );
-      setUserWalletsPopup(res.wallets || []);
+      const wallets = res.wallets || [];
+      setUserWalletsPopup(wallets);
+      // Pre-populate edit state with current values
+      const edits: Record<string, { address: string; balance: string }> = {};
+      wallets.forEach((w: any) => {
+        edits[w._id] = { address: w.address || "", balance: String(w.balance ?? 0) };
+      });
+      setWalletEdits(edits);
     } catch (_) {
       setUserWalletsPopup([]);
     } finally {
       setWalletsPopupLoading(false);
+    }
+  };
+
+  const handleWalletSave = async (walletId: string, currencySymbol: string) => {
+    const edit = walletEdits[walletId];
+    if (!edit) return;
+    setWalletSavingId(walletId);
+    try {
+      const res = await apiCall<{ success: boolean; message: string; wallet: any }>(
+        "/api/users/wallets/admin-update",
+        {
+          method: "PUT",
+          body: { walletId, address: edit.address, balance: parseFloat(edit.balance) || 0 },
+        }
+      );
+      if (res.success) {
+        // Update local popup state
+        setUserWalletsPopup((prev) =>
+          prev.map((w) => (w._id === walletId ? { ...w, address: res.wallet.address, balance: res.wallet.balance } : w))
+        );
+        showToast(`${currencySymbol} wallet updated!`, "success");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Failed to update wallet.", "error");
+    } finally {
+      setWalletSavingId(null);
     }
   };
 
@@ -1596,13 +1633,13 @@ export default function AdminUsersPage() {
             <div className="flex justify-between items-center px-6 py-4 border-b border-neutral-800">
               <div className="flex flex-col gap-0.5 text-left">
                 <h3 className="text-base font-black text-white tracking-tight">Wallet Balances</h3>
-                <span className="text-[11px] text-neutral-500">@{selectedUserForWallets.username}</span>
+                <span className="text-[11px] text-neutral-500">@{selectedUserForWallets.username} — edit address or balance and save</span>
               </div>
               <button onClick={() => setSelectedUserForWallets(null)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="p-6 overflow-y-auto max-h-[420px] text-left">
+            <div className="p-6 overflow-y-auto max-h-[480px] text-left flex flex-col gap-4">
               {walletsPopupLoading ? (
                 <div className="flex items-center justify-center py-12 text-neutral-500 text-sm">Loading wallets…</div>
               ) : userWalletsPopup.length === 0 ? (
@@ -1611,29 +1648,72 @@ export default function AdminUsersPage() {
                   <p className="text-sm font-bold">No wallets found</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {userWalletsPopup.map((w) => (
-                    <div key={w._id} className="flex items-center justify-between bg-[#0f1115] border border-neutral-800 rounded-lg px-4 py-3">
+                userWalletsPopup.map((w) => {
+                  const edit = walletEdits[w._id] || { address: w.address || "", balance: String(w.balance ?? 0) };
+                  const isSaving = walletSavingId === w._id;
+                  return (
+                    <div key={w._id} className="bg-[#0f1115] border border-neutral-800 rounded-lg p-4 flex flex-col gap-3">
+                      {/* Currency header */}
                       <div className="flex items-center gap-3">
                         {w.currencyLogo ? (
                           <img src={w.currencyLogo} alt={w.currencySymbol} className="w-8 h-8 rounded-full object-cover border border-neutral-700" />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-black text-neutral-400">{w.currencySymbol?.slice(0,3)}</div>
                         )}
-                        <div className="flex flex-col">
+                        <div>
                           <span className="text-sm font-extrabold text-white">{w.currencyName}</span>
-                          <span className="text-[10px] text-neutral-500 font-bold uppercase">{w.currencySymbol}</span>
+                          <span className="text-[10px] text-neutral-500 font-bold uppercase ml-2">{w.currencySymbol}</span>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-0.5">
-                        <span className="text-sm font-black text-white">${(w.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         {w.activeDeposit > 0 && (
-                          <span className="text-[10px] text-green-400 font-bold">Active: ${w.activeDeposit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                          <span className="ml-auto text-[10px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded">
+                            Active: ${w.activeDeposit.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
                         )}
                       </div>
+
+                      {/* Editable fields */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] text-neutral-500 font-extrabold uppercase tracking-wider">Balance ($)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={edit.balance}
+                            onChange={(e) => setWalletEdits((prev) => ({ ...prev, [w._id]: { ...edit, balance: e.target.value } }))}
+                            className="w-full bg-[#13151a] border border-neutral-700 rounded px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-[#e4c126] transition-colors"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] text-neutral-500 font-extrabold uppercase tracking-wider">Wallet Address</label>
+                          <input
+                            type="text"
+                            value={edit.address}
+                            onChange={(e) => setWalletEdits((prev) => ({ ...prev, [w._id]: { ...edit, address: e.target.value } }))}
+                            placeholder="No address set"
+                            className="w-full bg-[#13151a] border border-neutral-700 rounded px-3 py-2 text-xs text-neutral-300 font-mono focus:outline-none focus:border-[#e4c126] transition-colors"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Save button */}
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => handleWalletSave(w._id, w.currencySymbol)}
+                          disabled={isSaving}
+                          className="px-4 py-1.5 bg-[#e4c126] hover:bg-[#c9aa1a] text-black text-xs font-black rounded transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          {isSaving ? (
+                            <>
+                              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                              Saving…
+                            </>
+                          ) : "Save Changes"}
+                        </button>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })
               )}
             </div>
             <div className="flex justify-end px-6 py-4 border-t border-neutral-800 bg-[#0f1115]">
