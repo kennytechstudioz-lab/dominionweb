@@ -99,6 +99,14 @@ export default function AdminPlansPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Guard: reject files over 10MB before even trying to upload
+    if (file.size > 10 * 1024 * 1024) {
+      setFormError("Image is too large. Please select a file under 10MB.");
+      e.target.value = ""; // Reset input
+      return;
+    }
+
     // Revoke previous object URL to free memory
     if (imagePreview) URL.revokeObjectURL(imagePreview);
     const localUrl = URL.createObjectURL(file);
@@ -159,7 +167,12 @@ export default function AdminPlansPage() {
         setPendingImageFile(null);
         setImagePreview("");
       } catch (err: any) {
-        setFormError(err.message || "Failed to upload plan image.");
+        const isNetworkError = err.message === "Failed to fetch" || err.name === "TypeError";
+        setFormError(
+          isNetworkError
+            ? "Upload failed: Could not connect to the server. Check your internet connection or try a smaller image."
+            : err.message || "Failed to upload plan image."
+        );
         setIsSubmitting(false);
         setIsUploading(false);
         return;
