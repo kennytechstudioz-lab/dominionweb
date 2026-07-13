@@ -44,6 +44,16 @@ export default function AdminUsersPage() {
   // Modal States
   const [selectedUserForDetails, setSelectedUserForDetails] = useState<UserProfile | null>(null);
   const [selectedUserForTransactions, setSelectedUserForTransactions] = useState<UserProfile | null>(null);
+  const [userTransactions, setUserTransactions] = useState<any[]>([]);
+  const [txnLoading, setTxnLoading] = useState(false);
+
+  const [selectedUserForDeposits, setSelectedUserForDeposits] = useState<UserProfile | null>(null);
+  const [userDeposits, setUserDeposits] = useState<any[]>([]);
+  const [depositsLoading, setDepositsLoading] = useState(false);
+
+  const [selectedUserForWallets, setSelectedUserForWallets] = useState<UserProfile | null>(null);
+  const [userWalletsPopup, setUserWalletsPopup] = useState<any[]>([]);
+  const [walletsPopupLoading, setWalletsPopupLoading] = useState(false);
 
   // Verification modal states
   const [verifUser, setVerifUser] = useState<UserProfile | null>(null);
@@ -108,6 +118,54 @@ export default function AdminUsersPage() {
       setError(err.message || "Failed to retrieve user accounts database.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const openUserTransactions = async (user: UserProfile) => {
+    setSelectedUserForTransactions(user);
+    setUserTransactions([]);
+    setTxnLoading(true);
+    try {
+      const res = await apiCall<{ success: boolean; transactions: any[] }>(
+        `/api/users/transactions/all?username=${encodeURIComponent(user.username)}&limit=100`
+      );
+      setUserTransactions(res.transactions || []);
+    } catch (_) {
+      setUserTransactions([]);
+    } finally {
+      setTxnLoading(false);
+    }
+  };
+
+  const openUserDeposits = async (user: UserProfile) => {
+    setSelectedUserForDeposits(user);
+    setUserDeposits([]);
+    setDepositsLoading(true);
+    try {
+      const res = await apiCall<{ success: boolean; activeDeposits: any[] }>(
+        `/api/users/active-deposits/all?username=${encodeURIComponent(user.username)}`
+      );
+      setUserDeposits(res.activeDeposits || []);
+    } catch (_) {
+      setUserDeposits([]);
+    } finally {
+      setDepositsLoading(false);
+    }
+  };
+
+  const openUserWallets = async (user: UserProfile) => {
+    setSelectedUserForWallets(user);
+    setUserWalletsPopup([]);
+    setWalletsPopupLoading(true);
+    try {
+      const res = await apiCall<{ success: boolean; wallets: any[] }>(
+        `/api/users/wallets?username=${encodeURIComponent(user.username)}`
+      );
+      setUserWalletsPopup(res.wallets || []);
+    } catch (_) {
+      setUserWalletsPopup([]);
+    } finally {
+      setWalletsPopupLoading(false);
     }
   };
 
@@ -569,7 +627,7 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => { setVerifUser(user); setShowRejectInput(false); setRejectReason(""); }}
                             className={`font-extrabold transition-colors text-left focus:outline-none cursor-pointer hover:underline ${user.isVerifying ? "text-[#e4c126]" : "text-white hover:text-[#e4c126]"}`}
@@ -577,13 +635,24 @@ export default function AdminUsersPage() {
                           >
                             {user.username}
                           </button>
+                          {/* Transaction History Icon */}
                           <button
-                            onClick={() => setSelectedUserForTransactions(user)}
+                            onClick={() => openUserTransactions(user)}
                             className="text-neutral-500 hover:text-[#e4c126] transition-colors focus:outline-none cursor-pointer p-1 rounded hover:bg-neutral-800/50"
-                            title="View Transaction History Log"
+                            title="View Transaction History"
                           >
-                            <svg className="w-4 h-4 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                            </svg>
+                          </button>
+                          {/* Active Deposits Icon */}
+                          <button
+                            onClick={() => openUserDeposits(user)}
+                            className="text-neutral-500 hover:text-green-400 transition-colors focus:outline-none cursor-pointer p-1 rounded hover:bg-neutral-800/50"
+                            title="View Active Deposits"
+                          >
+                            <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </button>
                         </div>
@@ -611,8 +680,20 @@ export default function AdminUsersPage() {
                           <span className="text-neutral-600 text-[10px] font-bold">—</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-white font-extrabold">
-                        ${user.balance.toFixed(2)}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-white font-extrabold">${user.balance.toFixed(2)}</span>
+                          {/* Wallets Breakdown Icon */}
+                          <button
+                            onClick={() => openUserWallets(user)}
+                            className="text-neutral-500 hover:text-blue-400 transition-colors focus:outline-none cursor-pointer p-1 rounded hover:bg-neutral-800/50"
+                            title="View User Wallets"
+                          >
+                            <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18-3a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3m18-3V6" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         {/* Registration Date Column: Stacked Time above Date */}
@@ -1386,102 +1467,177 @@ export default function AdminUsersPage() {
       {/* 2. User Transaction History Modal Popup */}
       {selectedUserForTransactions && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#13151a] border border-neutral-800 rounded-lg w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in">
+          <div className="bg-[#13151a] border border-neutral-800 rounded-lg w-full max-w-3xl overflow-hidden shadow-2xl animate-fade-in">
             {/* Header */}
             <div className="flex justify-between items-center px-6 py-4 border-b border-neutral-800">
               <div className="flex flex-col gap-0.5 text-left">
-                <h3 className="text-base font-black text-white tracking-tight">Investor Transaction History</h3>
-                <span className="text-[11px] text-neutral-500">Record overview for @{selectedUserForTransactions.username}</span>
+                <h3 className="text-base font-black text-white tracking-tight">Transaction History</h3>
+                <span className="text-[11px] text-neutral-500">@{selectedUserForTransactions.username}</span>
               </div>
-              <button
-                onClick={() => setSelectedUserForTransactions(null)}
-                className="text-neutral-500 hover:text-white transition-colors cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+              <button onClick={() => setSelectedUserForTransactions(null)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            {/* Content Table */}
-            <div className="p-6 overflow-y-auto max-h-[400px] text-left">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-neutral-800 text-[12px] text-neutral-400 font-semibold normal-case">
-                    <th className="py-2.5">TXN ID</th>
-                    <th className="py-2.5">Asset / Technology Pipeline</th>
-                    <th className="py-2.5">Type</th>
-                    <th className="py-2.5">Amount</th>
-                    <th className="py-2.5">Standing Status</th>
-                    <th className="py-2.5 text-right">Allocation Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-800/40 text-xs">
-                  {[
-                    {
-                      id: "TXN-7089",
-                      fund: "Tranche A CCUS Pipeline Seed",
-                      amount: selectedUserForTransactions.balance * 0.6 || 12000,
-                      type: "deposit",
-                      status: "completed",
-                      date: "May 12, 2026",
-                    },
-                    {
-                      id: "TXN-7088",
-                      fund: "Offshore Carbon Capture Refinery",
-                      amount: selectedUserForTransactions.balance * 0.1 || 1450,
-                      type: "yield",
-                      status: "completed",
-                      date: "May 08, 2026",
-                    },
-                    {
-                      id: "TXN-7087",
-                      fund: "Carbon Certificate Offset Purchase",
-                      amount: selectedUserForTransactions.balance * 0.05 || 320,
-                      type: "offset",
-                      status: "completed",
-                      date: "Apr 28, 2026",
-                    },
-                    {
-                      id: "TXN-7086",
-                      fund: "Sustainable Methane Pipeline B",
-                      amount: selectedUserForTransactions.balance * 0.25 || 25000,
-                      type: "deposit",
-                      status: "completed",
-                      date: "Apr 15, 2026",
-                    },
-                  ].map((t) => (
-                    <tr key={t.id} className="hover:bg-neutral-900/40 transition-colors">
-                      <td className="py-3 font-mono font-bold text-neutral-400">{t.id}</td>
-                      <td className="py-3 font-extrabold text-white">{t.fund}</td>
-                      <td className="py-3">
-                        <span className={`text-[10px] font-bold uppercase ${
-                          t.type === "deposit" ? "text-green-400" : t.type === "yield" ? "text-[#e4c126]" : "text-blue-400"
-                        }`}>
-                          {t.type}
-                        </span>
-                      </td>
-                      <td className="py-3 font-black text-white">
-                        ${t.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="py-3">
-                        <span className="text-[9px] text-[#528574] font-extrabold bg-[#528574]/15 px-2 py-0.5 rounded uppercase">
-                          {t.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right text-neutral-500 font-semibold">{t.date}</td>
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[420px] text-left">
+              {txnLoading ? (
+                <div className="flex items-center justify-center py-12 text-neutral-500 text-sm">Loading transactions…</div>
+              ) : userTransactions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-neutral-600">
+                  <svg className="w-10 h-10 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
+                  <p className="text-sm font-bold">No transactions found</p>
+                  <p className="text-xs text-neutral-700">This user has no transaction records yet.</p>
+                </div>
+              ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-800 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
+                      <th className="pb-2.5">Type</th>
+                      <th className="pb-2.5">Currency</th>
+                      <th className="pb-2.5">Amount</th>
+                      <th className="pb-2.5">Status</th>
+                      <th className="pb-2.5 text-right">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-800/40 text-xs">
+                    {userTransactions.map((t) => (
+                      <tr key={t._id} className="hover:bg-neutral-900/40 transition-colors">
+                        <td className="py-3">
+                          <span className={`text-[10px] font-black uppercase tracking-wide ${
+                            t.transactionType === "deposit" ? "text-green-400" :
+                            t.transactionType === "withdrawal" ? "text-red-400" :
+                            t.transactionType === "profit" ? "text-[#e4c126]" : "text-blue-400"
+                          }`}>{t.transactionType}</span>
+                        </td>
+                        <td className="py-3 text-neutral-300 font-medium">{t.currencySymbol || t.currencyName || "—"}</td>
+                        <td className="py-3 font-black text-white">${(t.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3">
+                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded uppercase ${
+                            t.status === "completed" ? "text-green-400 bg-green-500/10" :
+                            t.status === "pending" ? "text-yellow-400 bg-yellow-500/10" : "text-red-400 bg-red-500/10"
+                          }`}>{t.status}</span>
+                        </td>
+                        <td className="py-3 text-right text-neutral-500 font-semibold">
+                          {new Date(t.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
-            {/* Footer */}
             <div className="flex justify-end px-6 py-4 border-t border-neutral-800 bg-[#0f1115]">
-              <button
-                onClick={() => setSelectedUserForTransactions(null)}
-                className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white rounded transition-colors cursor-pointer"
-              >
-                Close History
+              <button onClick={() => setSelectedUserForTransactions(null)} className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white rounded transition-colors cursor-pointer">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Active Deposits Modal Popup */}
+      {selectedUserForDeposits && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#13151a] border border-neutral-800 rounded-lg w-full max-w-3xl overflow-hidden shadow-2xl animate-fade-in">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-neutral-800">
+              <div className="flex flex-col gap-0.5 text-left">
+                <h3 className="text-base font-black text-white tracking-tight">Active Deposits</h3>
+                <span className="text-[11px] text-neutral-500">@{selectedUserForDeposits.username}</span>
+              </div>
+              <button onClick={() => setSelectedUserForDeposits(null)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[420px] text-left">
+              {depositsLoading ? (
+                <div className="flex items-center justify-center py-12 text-neutral-500 text-sm">Loading deposits…</div>
+              ) : userDeposits.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-neutral-600">
+                  <svg className="w-10 h-10 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <p className="text-sm font-bold">No active deposits</p>
+                  <p className="text-xs text-neutral-700">This user has no active deposit records.</p>
+                </div>
+              ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-neutral-800 text-[11px] text-neutral-400 font-semibold uppercase tracking-wider">
+                      <th className="pb-2.5">Plan</th>
+                      <th className="pb-2.5">Amount</th>
+                      <th className="pb-2.5">Yield %</th>
+                      <th className="pb-2.5">Duration</th>
+                      <th className="pb-2.5 text-right">Started</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-800/40 text-xs">
+                    {userDeposits.map((d) => (
+                      <tr key={d._id} className="hover:bg-neutral-900/40 transition-colors">
+                        <td className="py-3 font-extrabold text-white">{d.planName || "—"}</td>
+                        <td className="py-3 font-black text-green-400">${(d.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3 text-[#e4c126] font-bold">{d.percent ?? "—"}%</td>
+                        <td className="py-3 text-neutral-300">{d.duration ?? "—"} days</td>
+                        <td className="py-3 text-right text-neutral-500 font-semibold">
+                          {d.createdAt ? new Date(d.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="flex justify-end px-6 py-4 border-t border-neutral-800 bg-[#0f1115]">
+              <button onClick={() => setSelectedUserForDeposits(null)} className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white rounded transition-colors cursor-pointer">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. User Wallets Modal Popup */}
+      {selectedUserForWallets && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#13151a] border border-neutral-800 rounded-lg w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-neutral-800">
+              <div className="flex flex-col gap-0.5 text-left">
+                <h3 className="text-base font-black text-white tracking-tight">Wallet Balances</h3>
+                <span className="text-[11px] text-neutral-500">@{selectedUserForWallets.username}</span>
+              </div>
+              <button onClick={() => setSelectedUserForWallets(null)} className="text-neutral-500 hover:text-white transition-colors cursor-pointer">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[420px] text-left">
+              {walletsPopupLoading ? (
+                <div className="flex items-center justify-center py-12 text-neutral-500 text-sm">Loading wallets…</div>
+              ) : userWalletsPopup.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-neutral-600">
+                  <svg className="w-10 h-10 stroke-current fill-none stroke-[1.5]" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18-3a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3m18-3V6" /></svg>
+                  <p className="text-sm font-bold">No wallets found</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {userWalletsPopup.map((w) => (
+                    <div key={w._id} className="flex items-center justify-between bg-[#0f1115] border border-neutral-800 rounded-lg px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {w.currencyLogo ? (
+                          <img src={w.currencyLogo} alt={w.currencySymbol} className="w-8 h-8 rounded-full object-cover border border-neutral-700" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-black text-neutral-400">{w.currencySymbol?.slice(0,3)}</div>
+                        )}
+                        <div className="flex flex-col">
+                          <span className="text-sm font-extrabold text-white">{w.currencyName}</span>
+                          <span className="text-[10px] text-neutral-500 font-bold uppercase">{w.currencySymbol}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-sm font-black text-white">${(w.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        {w.activeDeposit > 0 && (
+                          <span className="text-[10px] text-green-400 font-bold">Active: ${w.activeDeposit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end px-6 py-4 border-t border-neutral-800 bg-[#0f1115]">
+              <button onClick={() => setSelectedUserForWallets(null)} className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-xs font-bold text-white rounded transition-colors cursor-pointer">Close</button>
             </div>
           </div>
         </div>
@@ -1490,3 +1646,4 @@ export default function AdminUsersPage() {
     </div>
   );
 }
+
