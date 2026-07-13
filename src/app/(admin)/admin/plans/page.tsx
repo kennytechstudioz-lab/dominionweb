@@ -27,6 +27,8 @@ export default function AdminPlansPage() {
   const [formSuccess, setFormSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string } | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -45,6 +47,8 @@ export default function AdminPlansPage() {
     setMax("");
     setReferralPercent("");
     setPicture("");
+    setPendingImageFile(null);
+    setImagePreview("");
     setDescription("");
     setBenefits([]);
     setNewBenefit("");
@@ -91,29 +95,16 @@ export default function AdminPlansPage() {
     }
   };
 
-  // Handles multipart file selection and uploads to AWS S3 bucket
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handles file selection — shows local preview without uploading yet
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setIsUploading(true);
+    // Revoke previous object URL to free memory
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    const localUrl = URL.createObjectURL(file);
+    setPendingImageFile(file);
+    setImagePreview(localUrl);
     setFormError(null);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // apiCall supports FormData out of the box
-      const response = await apiCall<{ success: boolean; url: string }>("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      setPicture(response.url);
-    } catch (err: any) {
-      setFormError(err.message || "Failed to upload image.");
-    } finally {
-      setIsUploading(false);
-    }
   };
 
   useEffect(() => {
@@ -150,6 +141,33 @@ export default function AdminPlansPage() {
     }
 
     setIsSubmitting(true);
+
+    // Upload the pending image first if one was selected
+    let uploadedPictureUrl = picture;
+    if (pendingImageFile) {
+      setIsUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", pendingImageFile);
+        const uploadRes = await apiCall<{ success: boolean; url: string }>("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        uploadedPictureUrl = uploadRes.url;
+        // Clean up local object URL memory
+        if (imagePreview) URL.revokeObjectURL(imagePreview);
+        setPendingImageFile(null);
+        setImagePreview("");
+      } catch (err: any) {
+        setFormError(err.message || "Failed to upload plan image.");
+        setIsSubmitting(false);
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     const planPayload: PlanData = {
       name: name.trim(),
       percent: Number(percent),
@@ -157,7 +175,7 @@ export default function AdminPlansPage() {
       min: Number(min),
       max: Number(max),
       referralPercent: Number(referralPercent),
-      picture: picture.trim() || "",
+      picture: uploadedPictureUrl.trim() || "",
       benefits,
       description: description.trim(),
     };
@@ -505,23 +523,23 @@ export default function AdminPlansPage() {
                   Pool Representative Picture *
                 </label>
                 
-                {picture ? (
-                  /* Image preview state after successful upload */
+                {(imagePreview || picture) ? (
+                  /* Image preview — local preview before submit, or saved URL when editing */
                   <div className="bg-[#13151a] border border-neutral-800 rounded p-4 flex items-center justify-between gap-4 animate-fade-in">
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <div className="relative w-12 h-12 rounded bg-neutral-900 border border-neutral-850 overflow-hidden flex-shrink-0">
+                      <div className="relative w-12 h-12 rounded bg-neutral-900 border border-neutral-700 overflow-hidden flex-shrink-0">
                         <img
-                          src={picture}
-                          alt="Uploaded Plan Preview"
+                          src={imagePreview || picture}
+                          alt="Plan Preview"
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[10px] text-green-400 font-extrabold uppercase tracking-wider">
-                          ✓ Uploaded Successfully
+                        <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider">
+                          {pendingImageFile ? "📎 Ready to upload on submit" : "✓ Saved"}
                         </span>
                         <p className="text-[11px] text-neutral-400 truncate max-w-sm font-medium">
-                          {picture}
+                          {pendingImageFile ? pendingImageFile.name : picture}
                         </p>
                       </div>
                     </div>
@@ -529,15 +547,23 @@ export default function AdminPlansPage() {
                     <button
                       type="button"
                       onClick={async () => {
-                        const originalUrl = picture;
-                        setPicture(""); // Reactively clear UI state instantly for beautiful UX
-                        try {
-                          await apiCall("/api/upload", {
-                            method: "DELETE",
-                            body: { url: originalUrl },
-                          });
-                        } catch (err: any) {
-                          console.error("Failed to delete asset on cancel: ", err);
+                        if (pendingImageFile) {
+                          // Not yet uploaded — just clear local state
+                          if (imagePreview) URL.revokeObjectURL(imagePreview);
+                          setPendingImageFile(null);
+                          setImagePreview("");
+                        } else {
+                          // Already uploaded to server — delete from server too
+                          const originalUrl = picture;
+                          setPicture("");
+                          try {
+                            await apiCall("/api/upload", {
+                              method: "DELETE",
+                              body: { url: originalUrl },
+                            });
+                          } catch (err: any) {
+                            console.error("Failed to delete asset: ", err);
+                          }
                         }
                       }}
                       className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded hover:bg-red-500/20 transition-all font-black uppercase tracking-wider cursor-pointer"
