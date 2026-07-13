@@ -110,7 +110,7 @@ export default function AdminPlansPage() {
 
       setPicture(response.url);
     } catch (err: any) {
-      setFormError(err.message || "Failed to upload image to AWS S3.");
+      setFormError(err.message || "Failed to upload image.");
     } finally {
       setIsUploading(false);
     }
@@ -502,7 +502,7 @@ export default function AdminPlansPage() {
               {/* Picture Upload Dropzone */}
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider">
-                  Pool Representative Picture (S3 Upload) *
+                  Pool Representative Picture *
                 </label>
                 
                 {picture ? (
@@ -518,7 +518,7 @@ export default function AdminPlansPage() {
                       </div>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span className="text-[10px] text-green-400 font-extrabold uppercase tracking-wider">
-                          ✓ Uploaded to AWS S3
+                          ✓ Uploaded Successfully
                         </span>
                         <p className="text-[11px] text-neutral-400 truncate max-w-sm font-medium">
                           {picture}
@@ -537,7 +537,7 @@ export default function AdminPlansPage() {
                             body: { url: originalUrl },
                           });
                         } catch (err: any) {
-                          console.error("Failed to delete S3 asset on cancel: ", err);
+                          console.error("Failed to delete asset on cancel: ", err);
                         }
                       }}
                       className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded hover:bg-red-500/20 transition-all font-black uppercase tracking-wider cursor-pointer"
@@ -550,7 +550,7 @@ export default function AdminPlansPage() {
                   <div className="border border-dashed border-neutral-800 bg-[#13151a]/40 rounded-lg p-6 flex flex-col items-center justify-center gap-3">
                     <div className="w-6 h-6 rounded-full border-2 border-[#e4c126] border-t-transparent animate-spin" />
                     <span className="text-[10px] text-neutral-400 font-bold uppercase tracking-widest animate-pulse">
-                      Pulsing media file to Amazon S3...
+                      Uploading media file to server...
                     </span>
                   </div>
                 ) : (
