@@ -24,7 +24,7 @@ interface PlanState {
   createPlan: (plan: PlanData) => Promise<{ success: boolean; error?: string }>;
   updatePlan: (id: string, plan: PlanData) => Promise<{ success: boolean; error?: string }>;
   deletePlan: (id: string) => Promise<{ success: boolean; error?: string }>;
-  fetchPlans: () => Promise<void>;
+  fetchPlans: (force?: boolean) => Promise<void>;
   clearError: () => void;
 }
 
@@ -42,7 +42,7 @@ export const usePlanStore = create<PlanState>((set, get) => ({
       });
 
       // Refetch plans to keep local state synchronized
-      await get().fetchPlans();
+      await get().fetchPlans(true);
 
       set({ isLoading: false, error: null });
       return { success: true };
@@ -62,7 +62,7 @@ export const usePlanStore = create<PlanState>((set, get) => ({
       });
 
       // Refetch plans to keep local state synchronized
-      await get().fetchPlans();
+      await get().fetchPlans(true);
 
       set({ isLoading: false, error: null });
       return { success: true };
@@ -81,7 +81,7 @@ export const usePlanStore = create<PlanState>((set, get) => ({
       });
 
       // Refetch plans to keep local state synchronized
-      await get().fetchPlans();
+      await get().fetchPlans(true);
 
       set({ isLoading: false, error: null });
       return { success: true };
@@ -92,9 +92,9 @@ export const usePlanStore = create<PlanState>((set, get) => ({
     }
   },
 
-  fetchPlans: async () => {
+  fetchPlans: async (force = false) => {
     const currentPlans = get().plans;
-    if (currentPlans && currentPlans.length > 0) {
+    if (!force && currentPlans && currentPlans.length > 0) {
       return;
     }
 

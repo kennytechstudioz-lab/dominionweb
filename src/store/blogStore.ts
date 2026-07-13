@@ -21,7 +21,7 @@ interface BlogState {
   blogs: BlogData[];
   isLoading: boolean;
   error: string | null;
-  fetchBlogs: () => Promise<void>;
+  fetchBlogs: (force?: boolean) => Promise<void>;
   createBlog: (data: BlogData) => Promise<{ success: boolean; error?: string }>;
   updateBlog: (id: string, data: Partial<BlogData>) => Promise<{ success: boolean; error?: string }>;
   deleteBlog: (id: string) => Promise<{ success: boolean; error?: string }>;
@@ -32,9 +32,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  fetchBlogs: async () => {
+  fetchBlogs: async (force = false) => {
     const currentBlogs = get().blogs;
-    if (currentBlogs && currentBlogs.length > 0) {
+    if (!force && currentBlogs && currentBlogs.length > 0) {
       return;
     }
 
@@ -51,7 +51,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   createBlog: async (data) => {
     try {
       await apiCall("/api/blogs", { method: "POST", body: data });
-      await get().fetchBlogs();
+      await get().fetchBlogs(true);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || "Failed to create blog." };
@@ -61,7 +61,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   updateBlog: async (id, data) => {
     try {
       await apiCall(`/api/blogs/${id}`, { method: "PUT", body: data });
-      await get().fetchBlogs();
+      await get().fetchBlogs(true);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || "Failed to update blog." };
@@ -71,7 +71,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   deleteBlog: async (id) => {
     try {
       await apiCall(`/api/blogs/${id}`, { method: "DELETE" });
-      set((s) => ({ blogs: s.blogs.filter((b) => b._id !== id) }));
+      await get().fetchBlogs(true);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || "Failed to delete blog." };

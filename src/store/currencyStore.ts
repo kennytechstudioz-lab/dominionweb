@@ -20,7 +20,7 @@ interface CurrencyState {
   createCurrency: (currency: CurrencyData) => Promise<{ success: boolean; error?: string }>;
   updateCurrency: (id: string, currency: CurrencyData) => Promise<{ success: boolean; error?: string }>;
   deleteCurrency: (id: string) => Promise<{ success: boolean; error?: string }>;
-  fetchCurrencies: () => Promise<void>;
+  fetchCurrencies: (force?: boolean) => Promise<void>;
   clearError: () => void;
 }
 
@@ -36,7 +36,7 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
         method: "POST",
         body: currency,
       });
-      await get().fetchCurrencies();
+      await get().fetchCurrencies(true);
       set({ isLoading: false, error: null });
       return { success: true };
     } catch (err: any) {
@@ -53,7 +53,7 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
         method: "PATCH",
         body: currency,
       });
-      await get().fetchCurrencies();
+      await get().fetchCurrencies(true);
       set({ isLoading: false, error: null });
       return { success: true };
     } catch (err: any) {
@@ -69,7 +69,7 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
       await apiCall(`/api/currencies/${id}`, {
         method: "DELETE",
       });
-      await get().fetchCurrencies();
+      await get().fetchCurrencies(true);
       set({ isLoading: false, error: null });
       return { success: true };
     } catch (err: any) {
@@ -79,9 +79,9 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
     }
   },
 
-  fetchCurrencies: async () => {
+  fetchCurrencies: async (force = false) => {
     const currentCurrencies = get().currencies;
-    if (currentCurrencies && currentCurrencies.length > 0) {
+    if (!force && currentCurrencies && currentCurrencies.length > 0) {
       return;
     }
 

@@ -250,7 +250,7 @@ export default function AdminPlansPage() {
         <div className="bg-red-500/10 border border-red-500/30 rounded p-4 flex items-center justify-between">
           <span className="text-xs text-red-400 font-bold">{error}</span>
           <button
-            onClick={fetchPlans}
+            onClick={() => fetchPlans()}
             className="text-[10px] bg-red-500/20 text-red-300 font-bold px-3 py-1.5 rounded hover:bg-red-500/30 transition-colors"
           >
             Retry Query
