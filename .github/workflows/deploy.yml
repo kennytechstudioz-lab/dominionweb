@@ -18,6 +18,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/dominion/web
+            cd /var/www/projects/investment/dominion/web
             git pull origin main
-            bash deploy.sh
+            bash /var/www/projects/investment/dominion/deploy.sh
