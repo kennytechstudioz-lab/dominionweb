@@ -16,17 +16,17 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
       {/* Who We Are Section */}
       <div className="max-w-7xl mx-auto px-[10px] md:px-6 relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column: Visual Video Preview Block */}
           <div className="lg:col-span-6 relative group">
             {/* Behind-left Diagonal Stripe Pattern block */}
             <div className="absolute -left-6 -top-6 -right-6 -bottom-6 bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_1.5px,transparent_1.5px,transparent_10px)] -z-10 rounded-lg opacity-80" />
 
-            <div 
+            <div
               onClick={() => setIsVideoOpen(true)}
               className="relative w-full aspect-[4/3] rounded-lg overflow-hidden shadow-2xl border border-neutral-100/80 bg-neutral-900 group cursor-pointer"
             >
-              {/* Ambient Looping Video Preview */}
+              {/* Ambient Looping Video */}
               <video
                 src="/Dominion.mp4"
                 autoPlay
@@ -37,7 +37,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
               />
               {/* Subtle Dark Overlay */}
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors duration-300" />
-              
+
               {/* Centered Glowing Pulsing Play Button */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex items-center justify-center w-20 h-20 rounded-full bg-[#e4c126] text-black shadow-lg animate-pulse-glow hover:scale-110 transition-transform duration-300">
@@ -63,7 +63,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
 
           {/* Right Column: Text / Info Panel */}
           <div className="lg:col-span-6 relative z-10 py-6">
-            
+
             {/* Behind-right Diagonal Stripe Pattern block */}
             <div className="absolute -left-12 -top-12 w-[115%] h-[115%] bg-[repeating-linear-gradient(45deg,#f3f4f6,#f3f4f6_1.5px,transparent_1.5px,transparent_10px)] -z-10 rounded-lg opacity-80" />
 
@@ -85,7 +85,7 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
 
               {/* Bottom Cards / Lists */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-start mb-8">
-                
+
                 {/* No 1 Medal Box */}
                 <div className="bg-white border border-neutral-100 p-6 rounded shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4">
                   {/* Medal Icon Square */}
