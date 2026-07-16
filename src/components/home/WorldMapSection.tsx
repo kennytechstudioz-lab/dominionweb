@@ -91,7 +91,7 @@ export default function WorldMapSection() {
             </h3>
 
             <p className="text-sm sm:text-base text-neutral-600 leading-relaxed max-w-xl">
-              Dominion Group Limited operates globally with offices across North America, South Africa, and Europe — bringing institutional-grade investment opportunities to investors worldwide and continuously expanding our reach into high-growth markets.
+              Dominion Group SA operates globally with offices across North America, South Africa, and Europe — bringing institutional-grade investment opportunities to investors worldwide and continuously expanding our reach into high-growth markets.
             </p>
 
             {/* Statistics Cards Row */}

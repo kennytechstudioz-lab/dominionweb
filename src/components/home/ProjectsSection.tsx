@@ -54,7 +54,7 @@ export default function ProjectsSection() {
           <div className="lg:col-span-6 flex flex-col sm:flex-row gap-6 items-start pt-2 lg:pt-8">
             <div className="flex-1">
               <p className="text-sm sm:text-base text-neutral-500 leading-relaxed max-w-xl">
-                Interdum lobortis nascetur aliquet tristique montes nisl nec nullam diam taciti rutrum. Fermentum metus nibh aenean ad eros lobortis dictumst tempus letius luctus. Eget diam mauris vitae consectetuer letius magna dapibus ultricies vehicula lorem penatibus.
+                We invest in a diverse portfolio of high-impact energy projects worldwide. From solar grids and wind farms to sustainable energy infrastructure, our projects are selected to deliver maximum environmental benefit alongside stable, long-term financial returns for our global investors.
               </p>
             </div>
             <div className="flex-shrink-0">

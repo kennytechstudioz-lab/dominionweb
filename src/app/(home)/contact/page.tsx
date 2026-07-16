@@ -82,7 +82,7 @@ export default function ContactPage() {
                   Reach Out To Us
                 </h3>
                 <p className="text-sm text-neutral-500 leading-relaxed mt-2">
-                  Laoreet condimentum tempus augue euismod eu nisl proin. Ultrices a et dignissim congue consectetur facilisis cubilia erat tempor.
+                  Our dedicated support team is available to assist you with any inquiries regarding our investment packages, platform operations, or partnership opportunities. Reach out to us, and we will get back to you as soon as possible.
                 </p>
               </div>
 
