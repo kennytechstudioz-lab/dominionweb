@@ -51,8 +51,7 @@ export default function AdminBlogPage() {
     setUploading(true);
     try {
       const fd = new FormData(); fd.append("file", imageFile);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/upload`, { method: "POST", body: fd });
-      const data = await res.json();
+      const data = await apiCall<{ success: boolean; url: string }>("/api/upload", { method: "POST", body: fd });
       return data.url || form.picture || "";
     } finally { setUploading(false); }
   };
@@ -62,12 +61,22 @@ export default function AdminBlogPage() {
     if (!form.category || !form.title || !form.author || !form.date || !form.content)
       return setFormError("Category, title, author, date, and content are required.");
     setSubmitting(true); setFormError(null);
-    const pictureUrl = await uploadImage();
-    const payload = { ...form, picture: pictureUrl };
-    const res = editTarget?._id ? await updateBlog(editTarget._id, payload) : await createBlog(payload);
-    setSubmitting(false);
-    if (res.success) { showToast(editTarget ? "Blog post updated." : "Blog post created."); setModalOpen(false); }
-    else setFormError(res.error || "Failed to save.");
+    try {
+      const pictureUrl = await uploadImage();
+      const payload = { ...form, picture: pictureUrl };
+      const res = editTarget?._id ? await updateBlog(editTarget._id, payload) : await createBlog(payload);
+      if (res.success) {
+        showToast(editTarget ? "Blog post updated." : "Blog post created.");
+        setModalOpen(false);
+      } else {
+        setFormError(res.error || "Failed to save.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setFormError(err.message || "Failed to upload image or save post.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const confirmDelete = async () => {
