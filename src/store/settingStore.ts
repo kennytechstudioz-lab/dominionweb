@@ -11,7 +11,8 @@ export interface SettingData {
   description: string;
   showCurrency: boolean;
   registrationLink?: string;
-  documents?: { name: string; url: string }[];
+  certificateUrl?: string;
+  documents?: { name: string; url: string; language: string }[];
   mapEmbed?: string;
 }
 

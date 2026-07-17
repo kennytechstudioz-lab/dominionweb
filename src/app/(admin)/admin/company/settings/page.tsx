@@ -3,9 +3,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSettingStore } from "@/store/settingStore";
 import { apiCall } from "@/lib/apiClient";
+import Image from "next/image";
 
-interface Doc { name: string; url: string; }
-interface PendingDoc { name: string; file: File; }
+interface Doc { name: string; url: string; language: string; }
+interface PendingDoc { name: string; language: string; file: File; }
 
 export default function AdminSettingsPage() {
   const {
@@ -26,9 +27,12 @@ export default function AdminSettingsPage() {
   const [showCurrency, setShowCurrency] = useState(false);
   const [registrationLink, setRegistrationLink] = useState("");
   const [mapEmbed, setMapEmbed] = useState("");
+  const [certificateUrl, setCertificateUrl] = useState("");
+  const [pendingCertificateFile, setPendingCertificateFile] = useState<File | null>(null);
   const [savedDocs, setSavedDocs] = useState<Doc[]>([]);
   const [pendingDocs, setPendingDocs] = useState<PendingDoc[]>([]);
   const [newDocName, setNewDocName] = useState("");
+  const [newDocLanguage, setNewDocLanguage] = useState("");
   const [newDocFile, setNewDocFile] = useState<File | null>(null);
   const newDocFileRef = useRef<HTMLInputElement>(null);
 
@@ -49,6 +53,7 @@ export default function AdminSettingsPage() {
         setShowCurrency(res.setting.showCurrency ?? false);
         setRegistrationLink(res.setting.registrationLink || "");
         setMapEmbed(res.setting.mapEmbed || "");
+        setCertificateUrl(res.setting.certificateUrl || "");
         setSavedDocs(res.setting.documents || []);
       }
     };
@@ -56,9 +61,10 @@ export default function AdminSettingsPage() {
   }, [fetchSettings]);
 
   const handleAddDoc = () => {
-    if (!newDocName.trim() || !newDocFile) return;
-    setPendingDocs((prev) => [...prev, { name: newDocName.trim(), file: newDocFile }]);
+    if (!newDocName.trim() || !newDocLanguage.trim() || !newDocFile) return;
+    setPendingDocs((prev) => [...prev, { name: newDocName.trim(), language: newDocLanguage.trim(), file: newDocFile }]);
     setNewDocName("");
+    setNewDocLanguage("");
     setNewDocFile(null);
     if (newDocFileRef.current) newDocFileRef.current.value = "";
   };
@@ -75,6 +81,24 @@ export default function AdminSettingsPage() {
 
     setIsSubmitting(true);
 
+    // Upload company certificate if present
+    let finalCertificateUrl = certificateUrl;
+    if (pendingCertificateFile) {
+      const fd = new FormData();
+      fd.append("file", pendingCertificateFile);
+      try {
+        const res = await apiCall<{ success: boolean; url: string }>("/api/upload", {
+          method: "POST",
+          body: fd,
+        });
+        finalCertificateUrl = res.url;
+      } catch {
+        setFormError("Failed to upload company certificate. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     // Upload pending documents one by one
     const uploadedDocs: Doc[] = [];
     for (const pending of pendingDocs) {
@@ -85,7 +109,7 @@ export default function AdminSettingsPage() {
           method: "POST",
           body: fd,
         });
-        uploadedDocs.push({ name: pending.name, url: res.url });
+        uploadedDocs.push({ name: pending.name, language: pending.language, url: res.url });
       } catch {
         setFormError(`Failed to upload "${pending.name}". Please try again.`);
         setIsSubmitting(false);
@@ -105,12 +129,15 @@ export default function AdminSettingsPage() {
       showCurrency,
       registrationLink: registrationLink.trim(),
       mapEmbed: mapEmbed.trim(),
+      certificateUrl: finalCertificateUrl,
       documents: allDocs,
     } as any);
 
     setIsSubmitting(false);
 
     if (result.success) {
+      setCertificateUrl(finalCertificateUrl);
+      setPendingCertificateFile(null);
       setSavedDocs(allDocs);
       setPendingDocs([]);
       setFormSuccess(true);
@@ -244,6 +271,52 @@ export default function AdminSettingsPage() {
                 <p className="text-[10px] text-neutral-500">Paste the full &lt;iframe&gt; embed code from Google Maps Share → Embed a map. The map will display below the contact form when valid.</p>
               </div>
 
+              {/* Company Certificate Image */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider">Company Certificate (Portrait Image)</label>
+                <div className="flex items-center gap-4">
+                  {certificateUrl && (
+                    <div className="relative w-20 h-28 border border-neutral-800 rounded overflow-hidden bg-neutral-900 flex-shrink-0">
+                      <Image
+                        src={certificateUrl}
+                        alt="Company Certificate"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 bg-[#0d0e12] border border-neutral-800/80 rounded px-4 py-2.5 text-sm text-neutral-400 hover:border-[#e4c126] cursor-pointer transition-colors w-fit">
+                      <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      <span className="text-xs font-semibold truncate max-w-[180px]">
+                        {pendingCertificateFile ? pendingCertificateFile.name : "Choose Certificate"}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => setPendingCertificateFile(e.target.files?.[0] || null)}
+                      />
+                    </label>
+                    {certificateUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCertificateUrl("");
+                          setPendingCertificateFile(null);
+                        }}
+                        className="text-xs text-red-500 hover:underline w-fit text-left"
+                      >
+                        Remove Certificate
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[10px] text-neutral-500">Upload an image of your company's incorporation certificate. It will be displayed in portrait on the About page.</p>
+              </div>
+
               {/* Add Document Row */}
               <div className="flex flex-col gap-3">
                 <label className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider">Upload Documents</label>
@@ -254,6 +327,13 @@ export default function AdminSettingsPage() {
                     onChange={(e) => setNewDocName(e.target.value)}
                     placeholder="Document name (e.g. Certificate of Incorporation)"
                     className={`${inputCls} flex-1`}
+                  />
+                  <input
+                    type="text"
+                    value={newDocLanguage}
+                    onChange={(e) => setNewDocLanguage(e.target.value)}
+                    placeholder="Language (e.g. English)"
+                    className={`${inputCls} w-full sm:w-[150px]`}
                   />
                   <label className="flex items-center gap-2 bg-[#0d0e12] border border-neutral-800/80 rounded px-4 py-2.5 text-sm text-neutral-400 hover:border-[#e4c126] cursor-pointer transition-colors flex-shrink-0">
                     <svg className="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -271,7 +351,7 @@ export default function AdminSettingsPage() {
                   <button
                     type="button"
                     onClick={handleAddDoc}
-                    disabled={!newDocName.trim() || !newDocFile}
+                    disabled={!newDocName.trim() || !newDocLanguage.trim() || !newDocFile}
                     className="flex-shrink-0 px-5 py-2.5 rounded text-xs font-black uppercase tracking-wider bg-[#e4c126] text-neutral-900 hover:bg-[#c9a71b] transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
                   >
                     Add
@@ -291,7 +371,7 @@ export default function AdminSettingsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-white">{doc.name}</span>
+                          <span className="text-xs font-bold text-white">{doc.name} <span className="text-neutral-500 font-normal">({doc.language})</span></span>
                           <span className="text-[10px] text-neutral-500">{doc.file.name}</span>
                         </div>
                       </div>
@@ -312,7 +392,7 @@ export default function AdminSettingsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-bold text-white truncate">{doc.name}</span>
+                          <span className="text-xs font-bold text-white truncate">{doc.name} {doc.language && <span className="text-neutral-500 font-normal">({doc.language})</span>}</span>
                           <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-[#e4c126] hover:underline truncate">{doc.url}</a>
                         </div>
                       </div>
