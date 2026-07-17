@@ -6,9 +6,10 @@ import VideoModal from "./VideoModal";
 
 interface AboutSectionProps {
   hideReadMore?: boolean;
+  certificateUrl?: string;
 }
 
-export default function AboutSection({ hideReadMore = false }: AboutSectionProps) {
+export default function AboutSection({ hideReadMore = false, certificateUrl }: AboutSectionProps) {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   return (
@@ -59,6 +60,27 @@ export default function AboutSection({ hideReadMore = false }: AboutSectionProps
                 &quot;100% Capital Guarantee &amp; Insurance&quot;
               </h4>
             </div>
+
+            {/* Company Certificate Portrait Image */}
+            {certificateUrl && (
+              <div className="mt-8 flex flex-col gap-3 items-center lg:items-start w-full">
+                <span className="text-[10px] text-neutral-400 font-extrabold uppercase tracking-wider">Company Certificate</span>
+                <a
+                  href={certificateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative w-full max-w-[240px] aspect-[1/1.414] rounded-lg overflow-hidden border border-neutral-200/80 shadow-md bg-white group hover:shadow-xl hover:border-[#528574] transition-all duration-300 flex items-center justify-center cursor-pointer"
+                >
+                  <Image
+                    src={certificateUrl}
+                    alt="Company Certificate"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/15 transition-colors duration-300" />
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Text / Info Panel */}
